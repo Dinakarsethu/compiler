@@ -1,0 +1,57 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Structure to represent an expression
+typedef struct {
+    char result[20];
+    char op[10];
+    char operand1[20];
+    char operand2[20];
+} Expression;
+
+// Function to check if two expressions are the same
+int areExpressionsEqual(Expression* expr1, Expression* expr2) {
+    return (strcmp(expr1->op, expr2->op) == 0 &&
+            strcmp(expr1->operand1, expr2->operand1) == 0 &&
+            strcmp(expr1->operand2, expr2->operand2) == 0);
+}
+
+// Function to perform common subexpression elimination
+void eliminateCommonSubexpressions(Expression* expressions, int numExpressions) {
+    for (int i = 0; i < numExpressions - 1; i++) {
+        for (int j = i + 1; j < numExpressions; j++) {
+            // Check if expressions i and j are the same
+            if (areExpressionsEqual(&expressions[i], &expressions[j])) {
+                // Replace the result of expression j with the result of expression i
+                printf("Eliminating common subexpression: %s = %s %s %s\n",
+                       expressions[j].result, expressions[i].operand1,
+                       expressions[i].op, expressions[i].operand2);
+                strcpy(expressions[j].result, expressions[i].result);
+            }
+        }
+    }
+}
+
+int main() {
+    // Example: Code with common subexpressions
+    Expression expressions[] = {
+        {"temp1", "+", "a", "b"},
+        {"temp2", "*", "temp1", "c"},
+        {"result", "+", "temp2", "temp1"},
+    };
+
+    int numExpressions = sizeof(expressions) / sizeof(Expression);
+
+    // Perform common subexpression elimination
+    eliminateCommonSubexpressions(expressions, numExpressions);
+
+    // Print optimized code
+    printf("Optimized code:\n");
+    for (int i = 0; i < numExpressions; i++) {
+        printf("%s = %s %s %s\n", expressions[i].result,
+               expressions[i].operand1, expressions[i].op, expressions[i].operand2);
+    }
+
+    return 0;
+}

@@ -1,0 +1,95 @@
+#include <stdio.h>
+#include <ctype.h>
+
+// Function prototypes
+int expr();
+int term();
+int factor();
+
+// Global variables
+char input[100];
+int pos = 0;
+
+// Function to match a specific character
+void match(char expected) {
+    if (input[pos] == expected) {
+        pos++;
+    } else {
+        fprintf(stderr, "Error: Expected '%c' but found '%c'\n", expected, input[pos]);
+    }
+}
+
+// Function to parse a factor
+int factor() {
+    int result = 0;
+
+    if (isdigit(input[pos])) {
+        result = input[pos] - '0';
+        pos++;
+    } else if (input[pos] == '(') {
+        match('(');
+        result = expr();
+        match(')');
+    } else {
+        fprintf(stderr, "Error: Unexpected character '%c'\n", input[pos]);
+    }
+
+    return result;
+}
+
+// Function to parse a term
+int term() {
+    int result = factor();
+
+    while (input[pos] == '*' || input[pos] == '/') {
+        char op = input[pos];
+        pos++;
+
+        if (op == '*') {
+            result *= factor();
+        } else {
+            int divisor = factor();
+            if (divisor != 0) {
+                result /= divisor;
+            } else {
+                fprintf(stderr, "Error: Division by zero\n");
+                return 0;
+            }
+        }
+    }
+
+    return result;
+}
+
+// Function to parse an expression
+int expr() {
+    int result = term();
+
+    while (input[pos] == '+' || input[pos] == '-') {
+        char op = input[pos];
+        pos++;
+
+        if (op == '+') {
+            result += term();
+        } else {
+            result -= term();
+        }
+    }
+
+    return result;
+}
+
+int main() {
+    printf("Enter an arithmetic expression: ");
+    fgets(input, sizeof(input), stdin);
+
+    int result = expr();
+
+    if (input[pos] == '\0' || input[pos] == '\n') {
+        printf("Result: %d\n", result);
+    } else {
+        fprintf(stderr, "Error: Unexpected characters at the end of input\n");
+    }
+
+    return 0;
+}

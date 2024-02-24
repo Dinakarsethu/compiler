@@ -1,0 +1,41 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+struct Symbol {
+    char name[50];
+    int value;
+    struct Symbol* next;
+};
+
+struct Symbol* head = NULL;
+
+void insertSymbol(char name[], int value) {
+    struct Symbol* newSymbol = (struct Symbol*)malloc(sizeof(struct Symbol));
+    strcpy(newSymbol->name, name);
+    newSymbol->value = value;
+    newSymbol->next = head;
+    head = newSymbol;
+}
+
+int findSymbol(char name[]) {
+    struct Symbol* current = head;
+    while (current != NULL) {
+        if (strcmp(current->name, name) == 0) {
+            return current->value;
+        }
+        current = current->next;
+    }
+    return -1; // Not found
+}
+
+int main() {
+    insertSymbol("x", 10);
+    insertSymbol("y", 20);
+    
+    printf("Value of x: %d\n", findSymbol("x"));
+    printf("Value of y: %d\n", findSymbol("y"));
+    printf("Value of z: %d\n", findSymbol("z"));
+    
+    return 0;
+}

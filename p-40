@@ -1,0 +1,35 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Structure to represent a three-address code instruction
+typedef struct {
+    char op[20];
+    char arg1[20];
+    char arg2[20];
+    char result[20];
+} ThreeAddressCode;
+
+// Function to generate code for an assignment statement
+void generateAssignmentCode(char* target, char* source) {
+    printf("MOV %s, %s\n", target, source);
+}
+
+// Function to generate code for an arithmetic operation
+void generateArithmeticCode(char* op, char* arg1, char* arg2, char* result) {
+    printf("%s %s, %s, %s\n", op, result, arg1, arg2);
+}
+
+int main() {
+    // Example: Code generation for a simple expression
+    ThreeAddressCode code1 = {"=", "a", "", "temp1"};
+    ThreeAddressCode code2 = {"+", "temp1", "b", "temp2"};
+    ThreeAddressCode code3 = {"*", "temp2", "c", "result"};
+
+    // Generate code for each instruction
+    generateAssignmentCode(code1.result, code1.arg1);
+    generateArithmeticCode(code2.op, code2.arg1, code2.arg2, code2.result);
+    generateArithmeticCode(code3.op, code3.arg1, code3.arg2, code3.result);
+
+    return 0;
+}

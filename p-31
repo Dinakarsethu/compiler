@@ -1,0 +1,129 @@
+#include <stdio.h>
+#include <string.h>
+
+// Maximum number of productions
+#define MAX_PRODUCTIONS 10
+
+// Maximum length of each production
+#define MAX_PROD_LENGTH 20
+
+char productions[MAX_PRODUCTIONS][MAX_PROD_LENGTH];
+int numProductions;
+
+// Function to check if a character is non-terminal
+int isNonTerminal(char ch) {
+    return (ch >= 'A' && ch <= 'Z');
+}
+
+// Function to eliminate left recursion from a given non-terminal
+void eliminateLeftRecursion(char nonTerminal) {
+    int i, j;
+    int numNewProductions = 0;
+    char newProductions[MAX_PRODUCTIONS][MAX_PROD_LENGTH];
+
+    for (i = 0; i < numProductions; i++) {
+        if (productions[i][0] == nonTerminal) {
+            // A -> Aα becomes A -> β1A' | β2A' | ... | βkA'
+            char alpha[MAX_PROD_LENGTH];
+            char beta[MAX_PROD_LENGTH];
+            int alphaIndex = 0;
+            int betaIndex = 0;
+            int isLeftRecursive = 0;
+
+            for (j = 3; j < strlen(productions[i]); j++) {
+                if (productions[i][j] == '|') {
+                    // Process each alternative in the production
+                    alpha[alphaIndex] = '\0';
+                    beta[betaIndex] = '\0';
+
+                    if (isLeftRecursive) {
+                        // A -> αA' for left recursive part
+                        sprintf(newProductions[numNewProductions++], "%c -> %s%c'", nonTerminal, alpha, nonTerminal);
+                    } else {
+                        // A -> βA' for non-left recursive part
+                        sprintf(newProductions[numNewProductions++], "%c -> %s%c'", nonTerminal, beta, nonTerminal);
+                    }
+
+                    alphaIndex = 0;
+                    betaIndex = 0;
+                    isLeftRecursive = 0;
+                } else {
+                    // Divide into left-recursive and non-left recursive parts
+                    if (productions[i][j] == nonTerminal) {
+                        isLeftRecursive = 1;
+                    }
+
+                    if (isLeftRecursive) {
+                        alpha[alphaIndex++] = productions[i][j];
+                    } else {
+                        beta[betaIndex++] = productions[i][j];
+                    }
+                }
+            }
+
+            // Process the last alternative in the production
+            alpha[alphaIndex] = '\0';
+            beta[betaIndex] = '\0';
+
+            if (isLeftRecursive) {
+                // A -> αA' for left recursive part
+                sprintf(newProductions[numNewProductions++], "%c -> %s%c'", nonTerminal, alpha, nonTerminal);
+            } else {
+                // A -> βA' for non-left recursive part
+                sprintf(newProductions[numNewProductions++], "%c -> %s%c'", nonTerminal, beta, nonTerminal);
+            }
+
+            // A' -> ε
+            sprintf(newProductions[numNewProductions++], "%c' -> ε", nonTerminal);
+        }
+    }
+
+    // Copy the remaining productions that do not involve the specified non-terminal
+    for (i = 0; i < numProductions; i++) {
+        if (productions[i][0] != nonTerminal) {
+            sprintf(newProductions[numNewProductions++], "%s", productions[i]);
+        }
+    }
+
+    // Copy the new productions back to the original array
+    numProductions = numNewProductions;
+    for (i = 0; i < numProductions; i++) {
+        sprintf(productions[i], "%s", newProductions[i]);
+    }
+}
+
+int main() {
+    int i;
+
+    // Input the number of productions
+    printf("Enter the number of productions: ");
+    scanf("%d", &numProductions);
+
+    // Input the productions
+    printf("Enter the productions:\n");
+    for (i = 0; i < numProductions; i++) {
+        scanf("%s", productions[i]);
+    }
+
+    // Display the original productions
+    printf("\nOriginal Productions:\n");
+    for (i = 0; i < numProductions; i++) {
+        printf("%s\n", productions[i]);
+    }
+
+    // Eliminate left recursion for each non-terminal
+    for (i = 0; i < numProductions; i++) {
+        char nonTerminal = productions[i][0];
+        if (isNonTerminal(nonTerminal)) {
+            eliminateLeftRecursion(nonTerminal);
+        }
+    }
+
+    // Display the productions after left recursion elimination
+    printf("\nProductions after Left Recursion Elimination:\n");
+    for (i = 0; i < numProductions; i++) {
+        printf("%s\n", productions[i]);
+    }
+
+    return 0;
+}

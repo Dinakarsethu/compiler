@@ -1,0 +1,25 @@
+#include <stdio.h>
+
+int main() {
+    const char inputString[] = "Hello World!\nThis is a sample text with spaces.";
+
+    char ch;
+    int whitespace_count = 0;
+    int newline_count = 0;
+
+    for (int i = 0; inputString[i] != '\0'; i++) {
+        ch = inputString[i];
+        if (ch == ' ' || ch == '\t') {
+            // Count whitespaces and tabs
+            whitespace_count++;
+        } else if (ch == '\n') {
+            // Count newline characters
+            newline_count++;
+        }
+    }
+
+    printf("Number of whitespaces: %d\n", whitespace_count);
+    printf("Number of newline characters: %d\n", newline_count);
+
+    return 0;
+}

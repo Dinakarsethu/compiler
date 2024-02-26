@@ -1,0 +1,98 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+// Structure to represent a production rule
+struct ProductionRule {
+    char nonTerminal;
+    char* production;
+};
+
+// Function to perform left factoring on a set of production rules
+void leftFactor(struct ProductionRule* rules, int ruleCount) {
+    for (int i = 0; i < ruleCount; i++) {
+        char commonPrefix[50]; // Adjust the size based on your needs
+        commonPrefix[0] = '\0';
+
+        for (int j = i + 1; j < ruleCount; j++) {
+            int k;
+            for (k = 0; rules[i].production[k] != '\0' && rules[j].production[k] != '\0'; k++) {
+                if (rules[i].production[k] != rules[j].production[k]) {
+                    break;
+                }
+            }
+
+            if (k > 0 && k > strlen(commonPrefix)) {
+                strncpy(commonPrefix, rules[i].production, k);
+                commonPrefix[k] = '\0';
+            }
+        }
+
+        if (strlen(commonPrefix) > 0) {
+            printf("Common Prefix: %s\n", commonPrefix);
+
+            // Create new non-terminal
+            char newNonTerminal = 'X';
+            while (1) {
+                int nonTerminalExists = 0;
+                for (int j = 0; j < ruleCount; j++) {
+                    if (rules[j].nonTerminal == newNonTerminal) {
+                        nonTerminalExists = 1;
+                        break;
+                    }
+                }
+
+                if (!nonTerminalExists) {
+                    break;
+                }
+
+                newNonTerminal++;
+            }
+
+            // Update the original rule and add a new rule
+            char* suffix1 = rules[i].production + strlen(commonPrefix);
+            char* suffix2 = rules[i + 1].production + strlen(commonPrefix);
+
+            rules[i].production[0] = '\0';
+            strcat(rules[i].production, commonPrefix);
+            strcat(rules[i].production, &newNonTerminal);
+            strcat(rules[i].production, suffix1);
+
+            rules[i + 1].nonTerminal = newNonTerminal;
+            rules[i + 1].production[0] = '\0';
+            strcat(rules[i + 1].production, suffix2);
+        }
+    }
+}
+
+// Function to print the modified production rules
+void printModifiedRules(struct ProductionRule* rules, int ruleCount) {
+    printf("Modified Production Rules:\n");
+    for (int i = 0; i < ruleCount; i++) {
+        printf("%c -> %s\n", rules[i].nonTerminal, rules[i].production);
+    }
+}
+
+int main() {
+    // Example production rules
+    struct ProductionRule rules[] = {
+        {'A', "abX"},
+        {'A', "abc"},
+        {'B', "abd"},
+        {'C', "abef"},
+        // Add more rules as needed
+    };
+
+    int ruleCount = sizeof(rules) / sizeof(rules[0]);
+
+    printf("Original Production Rules:\n");
+    for (int i = 0; i < ruleCount; i++) {
+        printf("%c -> %s\n", rules[i].nonTerminal, rules[i].production);
+    }
+
+    leftFactor(rules, ruleCount);
+
+    printModifiedRules(rules, ruleCount);
+
+    return 0;
+}

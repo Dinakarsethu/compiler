@@ -1,0 +1,106 @@
+#include <stdio.h>
+#include <stdbool.h>
+#include <ctype.h>
+#include <string.h>
+#define MAX_IDENTIFIER_LENGTH 50
+typedef enum {
+    IDENTIFIER,
+    CONSTANT,
+    OPERATOR
+} TokenType;
+typedef struct {
+    TokenType type;
+    char value[MAX_IDENTIFIER_LENGTH];
+} Token;
+bool isOperator(char ch) {
+    return (ch == '+' || ch == '-' || ch == '*' || ch == '/');
+}
+bool isWhitespace(char ch) {
+    return (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r');
+}
+bool isCommentStart(char ch) {
+    return (ch == '/' || ch == '*');
+}
+bool isValidIdentifierChar(char ch) {
+    return (isalnum(ch) || ch == '_');
+}
+void processIdentifier(const char* input, int* index, Token* token) {
+    int i = 0;
+    while (isValidIdentifierChar(input[*index]) && i < MAX_IDENTIFIER_LENGTH - 1) {
+        token->value[i++] = input[(*index)++];
+    }
+    token->value[i] = '\0';
+    token->type = IDENTIFIER;
+}
+void processConstant(const char* input, int* index, Token* token) {
+    int i = 0;
+    while (isdigit(input[*index]) && i < MAX_IDENTIFIER_LENGTH - 1) {
+        token->value[i++] = input[(*index)++];
+    }
+    token->value[i] = '\0';
+    token->type = CONSTANT;
+}
+void processOperator(const char* input, int* index, Token* token) {
+    token->value[0] = input[(*index)++];
+    token->value[1] = '\0';
+    token->type = OPERATOR;
+}
+void skipWhitespace(const char* input, int* index) {
+    while (isWhitespace(input[*index])) {
+        (*index)++;
+    }
+}
+void skipSingleLineComment(const char* input, int* index) {
+    while (input[*index] != '\0' && input[*index] != '\n') {
+        (*index)++;
+    }
+}
+void skipMultiLineComment(const char* input, int* index) {
+    while (input[*index] != '\0' && !(input[*index] == '*' && input[*index + 1] == '/')) {
+        (*index)++;
+    }
+    // Skip the '*' and '/'
+    (*index) += 2;
+}
+void processToken(const char* input, int* index, Token* token) {
+    skipWhitespace(input, index);
+
+    if (isCommentStart(input[*index])) {
+        if (input[*index] == '/' && input[*index + 1] == '/') {
+            // Single-line comment
+            skipSingleLineComment(input, index);
+        } else if (input[*index] == '/' && input[*index + 1] == '*') {
+            // Multi-line comment
+            skipMultiLineComment(input, index);
+        }
+    } else if (isValidIdentifierChar(input[*index])) {
+        processIdentifier(input, index, token);
+    } else if (isdigit(input[*index])) {
+        processConstant(input, index, token);
+    } else if (isOperator(input[*index])) {
+        processOperator(input, index, token);
+    } else {
+        // Skip other characters
+        (*index)++;
+    }
+}
+int main() {
+    const char inputString[] = "x = 10 + y /* Comment here */ - z;";
+
+    int index = 0;
+    Token token;
+
+    while (inputString[index] != '\0') {
+        processToken(inputString, &index, &token);
+
+        if (token.type == IDENTIFIER) {
+            printf("Identifier: %s\n", token.value);
+        } else if (token.type == CONSTANT) {
+            printf("Constant: %s\n", token.value);
+        } else if (token.type == OPERATOR) {
+            printf("Operator: %s\n", token.value);
+        }
+    }
+
+    return 0;
+}

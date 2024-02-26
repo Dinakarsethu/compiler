@@ -1,0 +1,30 @@
+#include <stdio.h>
+#include <stdbool.h>
+
+bool isSingleLineComment(const char* str) {
+    return (str[0] == '/' && str[1] == '/');
+}
+
+bool isMultiLineCommentStart(const char* str) {
+    return (str[0] == '/' && str[1] == '*');
+}
+
+bool isMultiLineCommentEnd(const char* str) {
+    return (str[0] == '*' && str[1] == '/');
+}
+
+bool isComment(const char* str) {
+    return isSingleLineComment(str) || isMultiLineCommentStart(str);
+}
+
+int main() {
+    const char testString[] = "// This is a single-line comment";
+    
+    if (isComment(testString)) {
+        printf("The given string is a comment.\n");
+    } else {
+        printf("The given string is not a comment.\n");
+    }
+
+    return 0;
+}

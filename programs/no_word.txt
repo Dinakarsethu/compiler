@@ -1,0 +1,17 @@
+%{
+#include <stdio.h>
+%}
+
+digit   [0-9]
+word    [a-zA-Z]+
+
+%%
+{digit}+    { printf("Number: %s\n", yytext); }
+{word}      { printf("Word: %s\n", yytext); }
+.           ; // Ignore any other characters
+
+%%
+
+int main() {
+    yylex();
+    return 0
